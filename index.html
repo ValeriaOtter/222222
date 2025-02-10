@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мур</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #ffccdd;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+            margin: 0;
+        }
+        .container {
+            display: flex;
+            width: 80%;
+            height: 80%;
+            gap: 10px;
+        }
+        .column {
+            flex: 1;
+            background: #ff99bb;
+            padding: 10px;
+            text-align: center;
+            border-radius: 10px;
+            min-height: 300px;
+            font-size: 20px;
+        }
+        .middle {
+            flex: 1.5;
+            background: #ffb3c6;
+        }
+        .item {
+            background: white;
+            padding: 10px;
+            margin: 5px;
+            cursor: grab;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .correct {
+            background: #b3ffb3;
+        }
+        .wrong {
+            background: #ff6666;
+        }
+        .hidden {
+            display: none;
+        }
+        .hearts {
+            position: absolute;
+            font-size: 30px;
+            color: red;
+            animation: float 5s infinite ease-in-out;
+            bottom: -50px;
+        }
+        @keyframes float {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(-100vh); opacity: 0; }
+        }
+        .final-screen {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: #ffccdd;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 50px;
+            color: #d6006d;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="column" id="wrongColumn">❌ Нельзя</div>
+        <div class="column middle" id="tasks">
+            <div class="item" draggable="true">Пить много воды</div>
+            <div class="item" draggable="true">Смотреть сериалы всю ночь</div>
+            <div class="item" draggable="true">Принимать лекарства</div>
+            <div class="item" draggable="true">Забывать кушать</div>
+            <div class="item" draggable="true">Ходить в холодную погоду</div>
+            <div class="item" draggable="true">Отдыхать</div>
+            <div class="item" draggable="true">Читать книги</div>
+            <div class="item" draggable="true">Игнорировать симптомы</div>
+            <div class="item" draggable="true">Заниматься спортом</div>
+            <div class="item" draggable="true">Спать достаточно</div>
+        </div>
+        <div class="column" id="correctColumn">✔ Полезно</div>
+    </div>
+    <script>
+        let items = document.querySelectorAll(".item");
+        let correctColumn = document.getElementById("correctColumn");
+        let wrongColumn = document.getElementById("wrongColumn");
+        let tasksColumn = document.getElementById("tasks");
+        let correctAnswers = ["Пить много воды", "Принимать лекарства", "Отдыхать", "Читать книги", "Спать достаточно", "Заниматься спортом"];
+        
+        items.forEach(item => {
+            item.addEventListener("dragstart", event => {
+                event.dataTransfer.setData("text", item.innerText);
+            });
+        });
+
+        [correctColumn, wrongColumn].forEach(column => {
+            column.addEventListener("dragover", event => {
+                event.preventDefault();
+            });
+            
+            column.addEventListener("drop", event => {
+                event.preventDefault();
+                let text = event.dataTransfer.getData("text");
+                let draggedItem = Array.from(items).find(i => i.innerText === text);
+                if (!draggedItem) return;
+
+                let isCorrect = (correctAnswers.includes(text) && column === correctColumn) || 
+                              (!correctAnswers.includes(text) && column === wrongColumn);
+
+                if (isCorrect) {
+                    draggedItem.classList.add("correct");
+                    column.appendChild(draggedItem);
+                    checkCompletion();
+                } else {
+                    draggedItem.classList.add("wrong");
+                    setTimeout(() => {
+                        draggedItem.classList.remove("wrong");
+                        tasksColumn.appendChild(draggedItem);
+                    }, 1000);
+                }
+            });
+        });
+
+        function checkCompletion() {
+            let correctlyPlaced = Array.from(items).filter(item => item.classList.contains("correct")).length;
+            if (correctlyPlaced === items.length) {
+                document.body.innerHTML = '<div class="final-screen">Выздоравливайте. Люблю вас сильно ❤️</div>';
+                
+               
+                for (let i = 0; i < 20; i++) {
+                    setTimeout(() => {
+                        let heart = document.createElement("div");
+                        heart.classList.add("hearts");
+                        heart.innerHTML = "❤️";
+                        heart.style.left = Math.random() * 100 + "vw";
+                        heart.style.animationDuration = (Math.random() * 3 + 2) + "s";
+                        document.body.appendChild(heart);
+                    }, i * 200); 
+                }
+            }
+        }
+    </script>
+</body>
+</html>
